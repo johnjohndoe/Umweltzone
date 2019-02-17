@@ -23,9 +23,14 @@ before_script:
   - echo ANDROID_BUILD_TOOLS_VERSION=$ANDROID_BUILD_TOOLS_VERSION
   # Reduce memory usage / avoid OutOfMemoryError with Gradle 4.10.3
   - echo "org.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxPermSize=768m" >> gradle.properties
+  - android-wait-for-emulator
+  - adb shell input keyevent 82
+
+install:
+  - ./gradlew clean assembleDebug testDebug assembleAndroidTest --stacktrace -PdisablePreDex
 
 script:
-  - ./gradlew clean testDebug assembleDebug -PdisablePreDex
+  - ./gradlew testDebug connectedCheck --stacktrace -PdisablePreDex
 
 before_cache:
   - rm -f  $TRAVIS_BUILD_DIR/.gradle/caches/modules-2/modules-2.lock
@@ -39,3 +44,14 @@ cache:
 
 before_install:
   - chmod +x gradlew
+  # Install SDK license so Android Gradle plugin can install deps.
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
+  # Install the rest of tools (e.g., avdmanager)
+  - sdkmanager tools
+  # Install the system image
+  - sdkmanager "system-images;android-18;default;armeabi-v7a"
+  # Create and start emulator for the script. Meant to race the install task.
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-18;default;armeabi-v7a"
+  - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
