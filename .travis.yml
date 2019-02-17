@@ -5,22 +5,7 @@ jdk: oraclejdk8
 notifications:
   email: true
 
-env:
-  global:
-    - ANDROID_API_LEVEL=`grep -H compileSdkVersion Umweltzone/build.gradle | grep -Po "\d+"`
-    - ANDROID_BUILD_TOOLS_VERSION=`grep -H buildToolsVersion Umweltzone/build.gradle | grep -Po "\d+.\d+.\d+"`
-
-android:
-  components:
-    - tools
-    - platform-tools
-    - tools
-    - build-tools-$ANDROID_BUILD_TOOLS_VERSION
-    - android-$ANDROID_API_LEVEL
-
 before_script:
-  - echo ANDROID_API_LEVEL=$ANDROID_API_LEVEL
-  - echo ANDROID_BUILD_TOOLS_VERSION=$ANDROID_BUILD_TOOLS_VERSION
   # Reduce memory usage / avoid OutOfMemoryError with Gradle 4.10.3
   - echo "org.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxPermSize=768m" >> gradle.properties
   - android-wait-for-emulator
