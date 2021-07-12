@@ -40,7 +40,7 @@ def validate_url(url_result, url):
 def write_csv_file(file_name, content):
     print("Writing to %s ..." % file_name)
     with open(file_name, 'wb') as f:
-        writer = csv.writer(f, lineterminator=LINE_TERMINATOR)
+        writer = csv.writer(f, lineterminator=LINE_TERMINATOR, quoting=csv.QUOTE_ALL)
         writer.writerows(content)
 
 
